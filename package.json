@@ -1,0 +1,21 @@
+{
+  "name": "anthropic-certifications",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "scrape": "bun run src/scripts/scrape.ts",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.4",
+    "astro": "^5.6.1",
+    "tailwindcss": "^4.1.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "playwright": "^1.51.1",
+    "typescript": "^5.8.3"
+  }
+}

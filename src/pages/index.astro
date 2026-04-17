@@ -1,0 +1,110 @@
+---
+import '../styles/global.css';
+import CertCard from '../components/CertCard.astro';
+import type { Certificate } from '../types/certificate.ts';
+
+// Import certificates — gracefully handle missing / empty file.
+let certificates: Certificate[] = [];
+try {
+  const data = await import('../../data/certificates.json');
+  // data.default is the parsed JSON array
+  const raw = data.default as unknown;
+  if (Array.isArray(raw)) {
+    certificates = raw as Certificate[];
+  }
+} catch {
+  // File missing or malformed — show empty state
+  certificates = [];
+}
+
+const total = certificates.length;
+const lastUpdated = new Date().toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="All Anthropic Skilljar certificates earned by Duver0."
+    />
+    <title>My Anthropic Certificates</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+
+  <body class="min-h-screen bg-gray-50 text-gray-800 font-sans">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
+        <div class="flex items-center gap-3">
+          <!-- Anthropic-style logo mark -->
+          <span class="text-2xl" aria-hidden="true">🤖</span>
+          <div>
+            <h1 class="text-xl font-bold text-gray-900">My Anthropic Certificates</h1>
+            <p class="text-xs text-gray-500">Anthropic Skilljar Profile</p>
+          </div>
+        </div>
+        <!-- Count badge -->
+        <span
+          class="ml-auto inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-700"
+        >
+          {total} {total === 1 ? 'certificate' : 'certificates'}
+        </span>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
+      {total === 0 ? (
+        <!-- Empty state -->
+        <div class="flex flex-col items-center justify-center py-24 text-center gap-4">
+          <span class="text-6xl" aria-hidden="true">🏅</span>
+          <h2 class="text-2xl font-semibold text-gray-700">No certificates yet</h2>
+          <p class="text-gray-400 max-w-sm">
+            Complete courses on{' '}
+            <a
+              href="https://anthropic.skilljar.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-orange-600 hover:underline"
+            >
+              Anthropic Skilljar
+            </a>{' '}
+            to earn certificates — they'll appear here automatically.
+          </p>
+        </div>
+      ) : (
+        <!-- Certificate grid -->
+        <div
+          class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          aria-label="Certificate grid"
+        >
+          {certificates.map((cert) => (
+            <CertCard cert={cert} />
+          ))}
+        </div>
+      )}
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 bg-white mt-16 py-6">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
+        <span>Last updated: {lastUpdated}</span>
+        <a
+          href="https://anthropic.skilljar.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:text-gray-600 hover:underline"
+        >
+          anthropic.skilljar.com
+        </a>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -27,6 +27,61 @@ async function waitAfterAction(page: any, timeout = 15000) {
   }
 }
 
+async function getCertificateImageUrl(page: any, certUrl: string): Promise<string> {
+  try {
+    const response = await page.goto(certUrl, {
+      waitUntil: 'domcontentloaded',
+      timeout: 60000,
+    });
+
+    if (!response || !response.ok()) {
+      return '';
+    }
+
+    await waitAfterAction(page);
+
+    const imageUrl = await page.evaluate(() => {
+      const clean = (value: string | null | undefined): string =>
+        (value ?? '').replace(/\s+/g, ' ').trim();
+
+      const extractBackgroundImageUrl = (value: string): string => {
+        const match = value.match(/url\(["']?([^"')]+)["']?\)/i);
+        return clean(match?.[1]);
+      };
+
+      const element = document.querySelector('.certificate-image') as HTMLElement | null;
+      if (!element) return '';
+
+      if (element instanceof HTMLImageElement) {
+        return clean(element.currentSrc || element.src);
+      }
+
+      const childImage = element.querySelector('img') as HTMLImageElement | null;
+      if (childImage) {
+        return clean(childImage.currentSrc || childImage.src);
+      }
+
+      const inlineStyleUrl = extractBackgroundImageUrl(element.style.backgroundImage || '');
+      if (inlineStyleUrl) {
+        return inlineStyleUrl;
+      }
+
+      const computedStyleUrl = extractBackgroundImageUrl(
+        window.getComputedStyle(element).backgroundImage || ''
+      );
+      if (computedStyleUrl) {
+        return computedStyleUrl;
+      }
+
+      return clean(element.getAttribute('src'));
+    });
+
+    return imageUrl ? new URL(imageUrl, certUrl).toString() : '';
+  } catch {
+    return '';
+  }
+}
+
 // ─── Validate environment ────────────────────────────────────────────────────
 
 const email = process.env.SKILLJAR_EMAIL;
@@ -170,7 +225,7 @@ try {
 
   console.log('🔍  Extracting certificates…');
 
-  const merged = await page.evaluate((): Certificate[] => {
+  const certificates = await page.evaluate((): Certificate[] => {
     const clean = (value: string | null | undefined): string =>
       (value ?? '').replace(/\s+/g, ' ').trim();
 
@@ -208,9 +263,6 @@ try {
         if (!certLink) continue;
 
         const certUrl = clean(certLink.href) || courseUrl;
-        const badgeImageUrl =
-          clean(statusCell?.querySelector('img')?.getAttribute('src')) ||
-          '';
 
         // Prefer the "Certificate completed" column (index 4),
         // fallback to "Completed" (index 3).
@@ -224,7 +276,7 @@ try {
           title,
           issueDate,
           courseUrl: certUrl,
-          badgeImageUrl,
+          badgeImageUrl: '',
           description: undefined,
         });
       }
@@ -235,7 +287,13 @@ try {
     return parseFromTable();
   });
 
-  console.log(`🏆  Found ${merged.length} certificate(s).`);
+  console.log(`🏆  Found ${certificates.length} certificate(s).`);
+
+  for (const cert of certificates) {
+    cert.badgeImageUrl = await getCertificateImageUrl(page, cert.courseUrl);
+  }
+
+  const merged = certificates;
 
   // ── Write output ──────────────────────────────────────────────────────────
 

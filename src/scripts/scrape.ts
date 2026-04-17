@@ -152,9 +152,16 @@ try {
       )
       .first();
     if ((await profileLink.count()) > 0) {
-      await profileLink.click();
-      await waitAfterAction(page);
-      console.log('📄  Navigated to profile via link.');
+      const href = await profileLink.getAttribute('href');
+      if (href) {
+        const targetUrl = new URL(href, BASE_URL).toString();
+        await page.goto(targetUrl, {
+          waitUntil: 'domcontentloaded',
+          timeout: 60000,
+        });
+        await waitAfterAction(page);
+        console.log(`📄  Navigated to profile via href: ${targetUrl}`);
+      }
     }
   }
 

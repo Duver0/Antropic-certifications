@@ -1,0 +1,61 @@
+---
+import type { Certificate } from '../types/certificate.ts';
+
+interface Props {
+  cert: Certificate;
+}
+
+const { cert } = Astro.props;
+
+/** Format "2024-03-15" or "March 15, 2024" → "March 2024" */
+function formatDate(raw: string): string {
+  if (!raw) return 'Date unknown';
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return raw; // return as-is if unparseable
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+const formattedDate = formatDate(cert.issueDate);
+const PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"%3E%3Crect width="200" height="200" fill="%23f3f4f6"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="48" fill="%239ca3af"%3E🏅%3C/text%3E%3C/svg%3E';
+---
+
+<article
+  class="flex flex-col rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md overflow-hidden"
+>
+  <!-- Badge image -->
+  <div class="flex items-center justify-center bg-gray-50 p-6">
+    <img
+      src={cert.badgeImageUrl || PLACEHOLDER}
+      alt={`${cert.title} badge`}
+      width="120"
+      height="120"
+      class="h-28 w-28 object-contain"
+      onerror={`this.src='${PLACEHOLDER}'`}
+    />
+  </div>
+
+  <!-- Card body -->
+  <div class="flex flex-1 flex-col gap-2 p-5">
+    <h2 class="text-base font-semibold leading-snug text-gray-900 line-clamp-3">
+      {cert.title}
+    </h2>
+
+    {cert.description && (
+      <p class="text-sm text-gray-500 line-clamp-2">{cert.description}</p>
+    )}
+
+    <p class="mt-auto text-xs text-gray-400 pt-2">Issued: {formattedDate}</p>
+  </div>
+
+  <!-- Footer link -->
+  <div class="border-t border-gray-100 px-5 py-3">
+    <a
+      href={cert.courseUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-sm font-medium text-orange-600 hover:text-orange-800 hover:underline"
+    >
+      View course →
+    </a>
+  </div>
+</article>

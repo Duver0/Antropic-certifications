@@ -40,7 +40,10 @@ const page = await context.newPage();
 
 try {
   console.log('🌐  Navigating to Skilljar…');
-  await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+  await page.goto(BASE_URL, { 
+  waitUntil: 'domcontentloaded',
+  timeout: 60000 
+});
 
   // ── Login ─────────────────────────────────────────────────────────────────
 
@@ -116,7 +119,10 @@ try {
   let foundProfile = false;
   for (const path of profilePaths) {
     const url = `${BASE_URL}${path}`;
-    const response = await page.goto(url, { waitUntil: 'networkidle' });
+    const response = await page.goto(url, { 
+  waitUntil: 'domcontentloaded',
+  timeout: 60000 
+});
     if (response && response.ok()) {
       console.log(`📄  Loaded profile page: ${url}`);
       foundProfile = true;
@@ -126,7 +132,10 @@ try {
 
   if (!foundProfile) {
     // Fall back to main page and look for a profile / dashboard link.
-    await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+    await page.goto(BASE_URL, { 
+  waitUntil: 'domcontentloaded',
+  timeout: 60000 
+});
     const profileLink = page
       .locator(
         'a[href*="profile"], a[href*="dashboard"], a[href*="my-courses"], a:has-text("My Courses"), a:has-text("Profile")'

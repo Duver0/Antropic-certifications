@@ -17,19 +17,20 @@ function formatDate(raw: string): string {
 
 const formattedDate = formatDate(cert.issueDate);
 const PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"%3E%3Crect width="200" height="200" fill="%23f3f4f6"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="48" fill="%239ca3af"%3E🏅%3C/text%3E%3C/svg%3E';
+const BADGE_SIZE = 160;
 ---
 
 <article
   class="group flex flex-col overflow-hidden rounded-2xl border border-[#d8c6af] bg-[#fffaf1] shadow-[0_8px_24px_rgba(77,51,37,0.08)] transition-transform duration-300 hover:-translate-y-1"
 >
   <!-- Badge image -->
-  <div class="flex items-center justify-center border-b border-[#e2d5c3] bg-[#f2e8da] p-6">
+  <div class="flex h-48 items-center justify-center border-b border-[#e2d5c3] bg-[#f2e8da] p-4">
     <img
       src={cert.badgeImageUrl || PLACEHOLDER}
       alt={`${cert.title} badge`}
-      width="120"
-      height="120"
-      class="h-28 w-28 object-contain transition-transform duration-300 group-hover:scale-105"
+      width={BADGE_SIZE}
+      height={BADGE_SIZE}
+      class="h-36 w-36 max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
       onerror={`this.src='${PLACEHOLDER}'`}
     />
   </div>

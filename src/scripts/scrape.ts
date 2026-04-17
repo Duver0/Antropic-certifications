@@ -17,6 +17,16 @@ import type { Certificate } from '../types/certificate.ts';
 const BASE_URL = 'https://anthropic.skilljar.com';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+async function waitAfterAction(page: any, timeout = 15000) {
+  try {
+    await page.waitForLoadState('domcontentloaded', { timeout });
+    await page.waitForLoadState('load', { timeout: 5000 });
+  } catch {
+    // Some pages keep background requests alive indefinitely.
+    // Continue if no meaningful navigation signal appears in time.
+  }
+}
+
 // ─── Validate environment ────────────────────────────────────────────────────
 
 const email = process.env.SKILLJAR_EMAIL;
@@ -64,7 +74,7 @@ try {
     if ((await el.count()) > 0) {
       console.log('🔐  Found sign-in link, attempting login…');
       await el.click();
-      await page.waitForLoadState('networkidle');
+      await waitAfterAction(page);
       break;
     }
   }
@@ -98,7 +108,7 @@ try {
       await passwordField.press('Enter');
     }
 
-    await page.waitForLoadState('networkidle');
+    await waitAfterAction(page);
     console.log('✅  Logged in (form submitted).');
     isLoggedIn = true;
   } else {
@@ -143,7 +153,7 @@ try {
       .first();
     if ((await profileLink.count()) > 0) {
       await profileLink.click();
-      await page.waitForLoadState('networkidle');
+      await waitAfterAction(page);
       console.log('📄  Navigated to profile via link.');
     }
   }

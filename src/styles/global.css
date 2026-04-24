@@ -77,6 +77,39 @@ body {
   }
 }
 
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  37.5% {
+    transform: translateX(var(--scroll-distance));
+  }
+  50% {
+    transform: translateX(var(--scroll-distance));
+  }
+  87.5% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.marquee-title {
+  display: inline-block;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.group:hover .marquee-title {
+  animation: marquee 8s ease-in-out infinite;
+  overflow: visible;
+  text-overflow: clip;
+  max-width: 50%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-fade-up,
   .stagger > * {
